@@ -1,0 +1,8 @@
+package za.co.clearline;
+
+import java.util.Properties;
+
+public class PropertiesHandler {
+
+	private static Properties prop = new Properties();
+}

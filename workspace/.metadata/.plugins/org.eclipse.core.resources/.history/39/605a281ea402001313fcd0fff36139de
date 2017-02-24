@@ -1,0 +1,168 @@
+package za.co.clearline;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
+import java.util.List;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
+/**
+ * This class will check if there are any new files that must be uploaded to the
+ * working folder.<br>
+ * If it finds files, it will first remove the existing files and move them into
+ * the archive folder.<br>
+ * It will then move the new files into the working directory.
+ * 
+ * @author clearline
+ * 
+ */
+public class SourceFileHandler {
+
+	private PropertiesHandler propHandler = new PropertiesHandler();
+	private String sourceFolder = null;
+	private String archiveFolder = null;
+	private String uploadFolder = null;
+	private String mediaType = null;
+	private long stableTime = 0L;
+
+	/**
+	 * Retrieve the play list for VLC to play.
+	 * 
+	 * @return
+	 */
+	public List<File> getFilePlayList() {
+
+		sourceFolder = propHandler.getProperty("source_folder");
+		archiveFolder = propHandler.getProperty("archive_folder");
+		uploadFolder = propHandler.getProperty("upload_folder");
+		mediaType = propHandler.getProperty("media_type");
+		stableTime = Long.parseLong(propHandler.getProperty("stable_name"));
+
+		/*
+		 * Check if any files are in the upload folder => new content.
+		 */
+		boolean newContextExist = newContentExists();
+
+		return null;
+	}
+
+	/**
+	 * Check if any new file exists that was modified more than 5 minutes ago.
+	 * Give any copy process from memStick time to complete copy before
+	 * attempting to move.
+	 * 
+	 * @return
+	 */
+	private boolean newContentExists() {
+
+		long timeNow = System.currentTimeMillis();
+		long lastModMax = 0L;
+
+		String glob = "*.{".concat(mediaType).concat("}");
+		Path dir = Paths.get(uploadFolder);
+
+		try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir,
+				glob)) {
+
+			for (Path path : dirStream) {
+				boolean isReqularReadableFile = Files.isRegularFile(path)
+						& Files.isReadable(path);
+				if (isReqularReadableFile) {
+					FileTime lastMod = Files.getLastModifiedTime(path);
+					long fileModLong = lastMod.toMillis();
+					if (fileModLong > lastModMax) {
+						lastModMax = fileModLong;
+					}
+				}
+			}
+
+		} catch (IOException ioe) {
+
+		}
+		if (lastModMax == 0) {
+			return false; // no files found.
+		}
+		/*
+		 * Check for no modifications for 5 minutes....
+		 */
+		if ((lastModMax + stableTime) < timeNow) {
+			return true;
+		}
+		/*
+		 * files exist but not old enough.
+		 */
+		return false;
+	}
+
+	/**
+	 * Move all current content to archive folder.
+	 */
+	private void moveCurrrentToArchive() {
+
+		/*
+		 * Move the current content to the archive folder...
+		 */
+		List<Path> sourceFiles = getCurrentContent();
+		for (Path path : sourceFiles) {
+			System.out.println("Moving file " + path.getFileName().toString()
+					+ " to archive folder");
+			moveToArchive(path);
+		}
+
+	}
+
+	/**
+	 * Get a list of paths in the source folder. Use paths here as we might have
+	 * to move this sometime.
+	 * 
+	 * @return
+	 */
+	private List<Path> getCurrentContent() {
+
+		List<Path> sourceFiles = new ArrayList<>();
+
+		String glob = "*.{".concat(mediaType).concat("}");
+		Path dir = Paths.get(uploadFolder);
+
+		try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir,
+				glob)) {
+
+			for (Path path : dirStream) {
+				boolean isReqularReadableFile = Files.isRegularFile(path)
+						& Files.isReadable(path);
+				if (isReqularReadableFile) {
+					sourceFiles.add(path);
+				}
+			}
+
+		} catch (IOException ioe) {
+
+		}
+
+		return sourceFiles;
+	}
+
+	/**
+	 * Move the file to the archive folder.
+	 * 
+	 * @param path
+	 */
+	private void moveToArchive(Path path) {
+
+		try {
+			String fileName = path.getFileName().toString();
+			File archiveFile = new File(archiveFolder + fileName);
+			Path archivePath = archiveFile.toPath();
+
+			Files.move(path, archivePath, REPLACE_EXISTING);
+
+		} catch (IOException io) {
+			io.printStackTrace();
+		}
+	}
+}

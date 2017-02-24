@@ -1,0 +1,14 @@
+package za.co.clearline;
+
+import java.util.Properties;
+
+public class TestProps {
+	private static Properties prop = null;
+	
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

@@ -1,0 +1,57 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1138\cocoasubrtf510
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\froman\fcharset0 Times-Roman;\f2\fmodern\fcharset0 Courier;
+}
+{\colortbl;\red255\green255\blue255;\red245\green137\blue0;\red68\green194\blue193;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\fs24 \cf0 http://www.behindtherack.com/?p=416\
+\
+\pard\pardeftab720\sa240
+
+\f1 \cf0 Centos6/RHEL6 don\'92t have the 
+\i System > Administration > Login Window
+\i0  menu item. So there is nowhere in the GUI to enable auto-login of a user. If you have a single-user environment and aren\'92t worried about anyone approaching your console then this is how you enable the auto login.\
+You need to edit the file at /etc/gdm/custom.conf\
+\pard\pardeftab720
+
+\f2 \cf0 su -\
+vi /etc/gdm/custom.conf\
+\pard\pardeftab720\sa240
+
+\f1 \cf0 You need to edit the daemon section of the file and add or change these:\
+[\cf2 daemon\cf0 ]\uc0\u8232 \cf2 AutomaticLoginEnable\cf0 =\cf3 true\cf0 \uc0\u8232 \cf2 AutomaticLogin\cf0 =
+\i \cf3 username
+\i0 \cf0 \
+Then you need to reboot and you\'92ll be logging in fine.\
+Credit on this goes to Sudhaker:\'a0http://sudhaker.com/23/centos-rhel-6-autologin\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0 \cf0 \
+\
+http://serverfault.com/questions/388953/how-to-run-a-script-automatically-on-system-startup-in-centos\
+\
+http://lifeforce4.wordpress.com/2012/04/12/centos-6-single-user-auto-login/\
+\
+http://superuser.com/questions/541455/how-to-auto-run-an-application-at-boot-on-centos\
+\
+\
+\
+\
+\
+http://www.tecmint.com/install-vlc-media-player-in-rhel-centos-6-3-5-6-fedora-17-12/\
+http://www.tldp.org/HOWTO/VideoLAN-HOWTO/x282.html\
+http://www.youtube.com/watch?v=MTVqITPuHt0\
+\
+http://minimaldevelop.com/blog/how-to-setup-streaming-server-via-vlc/\
+\
+http://superuser.com/questions/320589/startvlc-on-boot-in-debian\
+http://www.linuxquestions.org/questions/ubuntu-63/trying-to-launch-vlc-in-cli-install-upon-start-743455/\
+\
+http://osdir.com/ml/video.videolan.vlc.general/2003-06/msg00226.html\
+\
+http://littlesvr.ca/linux-stuff/articles/autologinconsole/autologinconsole.php\
+http://www.linuxquestions.org/questions/linux-general-1/how-do-i-automatically-start-a-program-at-start-up-102154/\
+\
+http://superuser.com/questions/211236/automatic-log-in-in-linux\
+}

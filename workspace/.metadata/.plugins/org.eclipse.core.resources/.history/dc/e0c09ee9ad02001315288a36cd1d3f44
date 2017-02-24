@@ -1,0 +1,25 @@
+package za.co.clearline;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+public class TestProps {
+	private static Properties prop = null;
+
+	public static void main(String[] args) {
+		try {
+
+			File propFiles = new File("//home//clearline//clearline.properties");
+			boolean canRead = propFiles.canRead();
+			
+			System.out.println("Can read prop file is " + canRead);
+			prop.load(new FileInputStream(propFiles));
+
+		} catch (IOException fne) {
+			fne.printStackTrace();
+		}
+	}
+
+}

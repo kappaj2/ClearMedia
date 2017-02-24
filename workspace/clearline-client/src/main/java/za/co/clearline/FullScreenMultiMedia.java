@@ -1,0 +1,149 @@
+package za.co.clearline;
+import java.awt.BorderLayout;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+import uk.co.caprica.vlcj.binding.LibVlc;
+import uk.co.caprica.vlcj.binding.LibVlcFactory;
+import uk.co.caprica.vlcj.player.MediaPlayerFactory;
+import uk.co.caprica.vlcj.player.embedded.DefaultFullScreenStrategy;
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+
+
+public class FullScreenMultiMedia {
+
+	boolean mustRun = true;
+	int index = 0;
+	int listSize = 0;
+
+//	private static final FileFilter VIDEO_FILE_FILTER = new FileFilter() {
+//		public boolean accept(File pathname) {
+//			return pathname.isFile() && pathname.getName().endsWith(".avi");
+//		}
+//	};
+//
+//	private static final FileFilter DIR_FILTER = new FileFilter() {
+//		public boolean accept(File pathname) {
+//			return pathname.isDirectory();
+//		}
+//	};
+
+	public static void main(final String[] args) {
+		LibVlc libVlc = LibVlcFactory.factory().create();
+
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				new FullScreenMultiMedia(args);
+			}
+		});
+	}
+
+	public FullScreenMultiMedia(String[] args) {
+
+		String[] VLC_ARGS = { "--intf", "dummy", // no interface
+				"--no-audio", // we don't want audio (decoding)
+				"--fullscreen", // full screen - added
+				"--video-on-top", // add
+				"--video-title-show", // nor the filename displayed
+				"--no-overlay", //
+				"--mirror-split=1", //
+				"--no-video-title-show", //
+				"--no-stats", // no stats
+				"--no-sub-autodetect-file", // we don't want subtitles
+				"--no-disable-screensaver", // we don't want interfaces
+		};
+
+		Canvas c = new Canvas();
+		c.setBackground(Color.black);
+
+		JPanel p = new JPanel();
+		p.setLayout(new BorderLayout());
+		p.add(c, BorderLayout.CENTER);
+
+		JFrame f = new JFrame();
+
+		f.setUndecorated(true);
+		f.setContentPane(p);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f.setSize(1024, 1080);
+
+		final MediaPlayerFactory mediaPlayerFactory = new MediaPlayerFactory(
+				VLC_ARGS);
+		final EmbeddedMediaPlayer mediaPlayer = mediaPlayerFactory
+				.newEmbeddedMediaPlayer(new DefaultFullScreenStrategy(f));
+		mediaPlayer.setVideoSurface(mediaPlayerFactory.newVideoSurface(c));
+		//mediaPlayer.setFullScreen(true);
+		mediaPlayer.setEnableKeyInputHandling(true);
+
+		f.setVisible(true);
+		
+		SourceFileHandler sourceFileHandler = new SourceFileHandler();
+		List<File> files = sourceFileHandler.getFilePlayList();
+		
+		//final List<File> files = scan(new File("//home//clearline//video//"));
+		listSize = files.size();
+
+		while (mustRun) {
+
+			String mrl = files.get(index).getAbsolutePath();
+			System.out.println("Playing file " + mrl);
+			mediaPlayer.startMedia(mrl);
+			
+			while (mediaPlayer.isPlaying()) {
+				try{
+					Thread.sleep(5000);
+				}catch(Exception ex){
+					
+				}
+			}
+			index++;
+			/*
+			 * When we reached the end of the list - then reload...
+			 */
+			if (index == listSize) {
+				index = 0;
+				files = sourceFileHandler.getFilePlayList();
+			}
+		}
+
+		if (files.isEmpty()) {
+			System.out.println("No media files found");
+			System.exit(1);
+		}
+
+	}
+
+//	/**
+//	 * Get the list of files to play.
+//	 * @param root
+//	 * @return
+//	 */
+//	private static List<File> scan(File root) {
+//		List<File> result = new ArrayList<File>(2000);
+//		scan(root, result);
+//		return result;
+//	}
+//
+//	/**
+//	 * Look for files in the directory and video type specified. Add them the the list to play.
+//	 * @param root
+//	 * @param result
+//	 */
+//	private static void scan(File root, List<File> result) {
+//		for (File file : root.listFiles(VIDEO_FILE_FILTER)) {
+//			result.add(file);
+//		}
+////		for (File dir : root.listFiles(DIR_FILTER)) {
+////			scan(dir, result);
+////		}
+//	}
+
+}
